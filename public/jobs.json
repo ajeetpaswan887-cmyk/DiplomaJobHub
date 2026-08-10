@@ -1,4 +1,5 @@
 {
+  "updatedAt": "2026-08-10",
   "jobs": [
     {
       "title": "Railway Junior Engineer",
@@ -6,7 +7,7 @@
       "category": "Government",
       "branches": ["Electrical", "Mechanical", "Civil"],
       "fresherOnly": true,
-      "qualification": "Diploma in relevant Engineering",
+      "qualification": "Diploma/Degree as specified in official notification",
       "location": "India",
       "salary": "As per official notification",
       "source": "https://www.rrbcdg.gov.in/",
@@ -25,17 +26,100 @@
       "applyUrl": "https://ssc.gov.in/"
     },
     {
-      "title": "PSU / Power Sector Opportunities",
-      "company": "Government & PSU",
+      "title": "Metro Rail Junior Engineer",
+      "company": "Metro Rail Corporations",
+      "category": "Government",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Relevant Diploma/Degree",
+      "location": "India",
+      "salary": "As per recruitment notification",
+      "source": "https://www.aai.aero/",
+      "applyUrl": "https://www.aai.aero/"
+    },
+    {
+      "title": "Technician / Junior Engineer",
+      "company": "PSU / Government Organizations",
       "category": "PSU",
       "branches": ["Electrical", "Mechanical", "Civil"],
       "fresherOnly": true,
-      "qualification": "Diploma in relevant Engineering",
+      "qualification": "Relevant Diploma",
       "location": "India",
-      "salary": "As per individual notification",
+      "salary": "As per official notification",
+      "source": "https://www.ncs.gov.in/",
+      "applyUrl": "https://www.ncs.gov.in/"
+    },
+    {
+      "title": "Diploma Engineer Trainee",
+      "company": "Private / MNC Companies",
+      "category": "Private",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Relevant Diploma",
+      "location": "India",
+      "salary": "Company dependent",
+      "source": "https://www.ncs.gov.in/",
+      "applyUrl": "https://www.ncs.gov.in/"
+    },
+    {
+      "title": "Diploma Apprentice",
+      "company": "Government / PSU / Private",
+      "category": "Apprenticeship",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Relevant Diploma",
+      "location": "India",
+      "salary": "Stipend as per apprenticeship rules",
+      "source": "https://www.apprenticeshipindia.gov.in/",
+      "applyUrl": "https://www.apprenticeshipindia.gov.in/"
+    },
+    {
+      "title": "NATS Diploma Apprenticeship",
+      "company": "Participating Organizations",
+      "category": "Apprenticeship",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Relevant Diploma",
+      "location": "India",
+      "salary": "Stipend as per organization",
+      "source": "https://nats.education.gov.in/",
+      "applyUrl": "https://nats.education.gov.in/"
+    },
+    {
+      "title": "Electrical Diploma Trainee",
+      "company": "Power / Manufacturing / EPC",
+      "category": "Private",
+      "branches": ["Electrical"],
+      "fresherOnly": true,
+      "qualification": "Diploma in Electrical Engineering",
+      "location": "India",
+      "salary": "Company dependent",
+      "source": "https://www.ncs.gov.in/",
+      "applyUrl": "https://www.ncs.gov.in/"
+    },
+    {
+      "title": "Mechanical Diploma Trainee",
+      "company": "Automobile / Manufacturing / Engineering",
+      "category": "Private",
+      "branches": ["Mechanical"],
+      "fresherOnly": true,
+      "qualification": "Diploma in Mechanical Engineering",
+      "location": "India",
+      "salary": "Company dependent",
+      "source": "https://www.ncs.gov.in/",
+      "applyUrl": "https://www.ncs.gov.in/"
+    },
+    {
+      "title": "Civil Diploma Trainee",
+      "company": "Construction / Infrastructure / EPC",
+      "category": "Private",
+      "branches": ["Civil"],
+      "fresherOnly": true,
+      "qualification": "Diploma in Civil Engineering",
+      "location": "India",
+      "salary": "Company dependent",
       "source": "https://www.ncs.gov.in/",
       "applyUrl": "https://www.ncs.gov.in/"
     }
-  ],
-  "hot": []
+  ]
 }
