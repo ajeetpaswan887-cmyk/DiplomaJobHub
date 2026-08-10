@@ -1,247 +1,195 @@
 let branch = "All";
 
-const $ = (s) => document.querySelector(s);
+const $ = (selector) => document.querySelector(selector);
 
-const esc = (s) =>
-  String(s ?? "").replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  }[c]));
+let allJobs = [];
 
-async function load() {
+/* =========================
+   LOAD JOB DATA
+========================= */
+
+async function loadJobs() {
   try {
-    const r = await fetch("./jobs.json", {
+    const response = await fetch("./jobs.json", {
       cache: "no-store"
     });
 
-    if (!r.ok) {
-      throw new Error("jobs.json load failed");
+    if (!response.ok) {
+      throw new Error("jobs.json not found");
     }
 
-    const data = await r.json();
+    const data = await response.json();
 
-    const allJobs = Array.isArray(data)
+    allJobs = Array.isArray(data)
       ? data
       : Array.isArray(data.jobs)
         ? data.jobs
         : [];
 
-    const q = ($("#q")?.value || "").trim().toLowerCase();
-
-    const types = [...document.querySelectorAll(".type:checked")]
-      .map(x => x.value);
-
-    const filtered = allJobs.filter(job => {
-
-      const branches = Array.isArray(job.branches)
-        ? job.branches
-        : [];
-
-      const branchOK =
-        branch === "All" ||
-        branches.includes(branch);
-
-      const typeOK =
-        types.length === 0 ||
-        types.includes(job.category);
-
-      const text = [
-        job.title,
-        job.company,
-        job.category,
-        job.qualification,
-        job.location,
-        branches.join(" ")
-      ].join(" ").toLowerCase();
-
-      const searchOK =
-        !q || text.includes(q);
-
-      return branchOK && typeOK && searchOK;
-    });
-
-    if ($("#total")) {
-      $("#total").textContent = allJobs.length;
-    }
-
-    if ($("#msg")) {
-      $("#msg").textContent =
-        `${filtered.length} jobs found`;
-    }
-
-    if ($("#jobs")) {
-      $("#jobs").innerHTML =
-        filtered.length
-          ? filtered.map(card).join("")
-          : `
-            <div class="empty">
-              <h3>🔎 No jobs found</h3>
-              <p>Try another branch, job type or search.</p>
-            </div>
-          `;
-    }
-
-    if ($("#hot")) {
-      const hotJobs = allJobs.slice(0, 5);
-
-      $("#hot").innerHTML = hotJobs.length
-        ? hotJobs.map(card).join("")
-        : "<p>No jobs available.</p>";
-    }
+    renderJobs();
 
   } catch (error) {
-
     console.error(error);
 
-    if ($("#jobs")) {
-      $("#jobs").innerHTML = `
+    const jobsBox = $("#jobs");
+
+    if (jobsBox) {
+      jobsBox.innerHTML = `
         <div class="empty">
           <h3>⚠️ Jobs load nahi ho pa rahi hain</h3>
-          <p>Please try again after refreshing the website.</p>
+          <p>Please refresh the website.</p>
         </div>
       `;
-    }
-
-    if ($("#msg")) {
-      $("#msg").textContent = "Unable to load jobs";
     }
   }
 }
 
-function card(j) {
 
-  const branches = Array.isArray(j.branches)
-    ? j.branches.join(", ")
+/* =========================
+   FILTER + SEARCH
+========================= */
+
+function renderJobs() {
+
+  const searchInput = $("#q");
+
+  const searchText = searchInput
+    ? searchInput.value.trim().toLowerCase()
     : "";
 
-  const source = j.source || j.applyUrl || "#";
-  const apply = j.applyUrl || j.source || "#";
+  const selectedTypes = [
+    ...document.querySelectorAll(".type:checked")
+  ].map(box => box.value.toLowerCase());
 
-  return `
-    <article class="job-card">
+  const fresherOnly =
+    document.querySelector(".fresher-filter input:checked") !== null;
 
-      <div class="job-top">
-        <span class="badge">
-          ${esc(j.category || "Job")}
-        </span>
+  const filteredJobs = allJobs.filter(job => {
 
-        ${
-          j.fresherOnly
-            ? `<span class="badge fresher">Fresher</span>`
-            : ""
-        }
-      </div>
+    /* Branch filter */
 
-      <h3>${esc(j.title || "Diploma Job")}</h3>
+    const branches = Array.isArray(job.branches)
+      ? job.branches
+      : [];
 
-      <p class="company">
-        🏢 ${esc(j.company || "Company")}
-      </p>
-
-      <p>
-        🎓 <b>Qualification:</b>
-        ${esc(j.qualification || "Diploma")}
-      </p>
-
-      <p>
-        ⚡ <b>Branch:</b>
-        ${esc(branches || "Relevant")}
-      </p>
-
-      <p>
-        📍 <b>Location:</b>
-        ${esc(j.location || "India")}
-      </p>
-
-      <p>
-        💰 <b>Salary:</b>
-        ${esc(j.salary || "As per notification")}
-      </p>
-
-      <div class="job-actions">
-
-        <a
-          href="${esc(source)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Source
-        </a>
-
-        <a
-          class="apply-btn"
-          href="${esc(apply)}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Apply Now →
-        </a>
-
-      </div>
-
-    </article>
-  `;
-}
+    const branchMatch =
+      branch === "All" ||
+      branches.some(b =>
+        String(b).toLowerCase() === branch.toLowerCase()
+      );
 
 
-/* Branch buttons */
+    /* Job type filter */
 
-document.querySelectorAll(".branch").forEach(btn => {
+    const category = String(
+      job.category || ""
+    ).toLowerCase();
 
-  btn.addEventListener("click", () => {
+    const typeMatch =
+      selectedTypes.length === 0 ||
+      selectedTypes.includes(category);
 
-    document
-      .querySelectorAll(".branch")
-      .forEach(x => x.classList.remove("active"));
 
-    btn.classList.add("active");
+    /* Fresher filter */
 
-    branch = btn.dataset.b || "All";
+    const fresherMatch =
+      !fresherOnly ||
+      job.fresherOnly === true;
 
-    load();
+
+    /* Search */
+
+    const searchableText = [
+
+      job.title,
+      job.company,
+      job.category,
+      job.qualification,
+      job.location,
+      job.salary,
+
+      ...(Array.isArray(job.branches)
+        ? job.branches
+        : [])
+
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+
+    const searchMatch =
+      searchText === "" ||
+      searchableText.includes(searchText);
+
+
+    return (
+      branchMatch &&
+      typeMatch &&
+      fresherMatch &&
+      searchMatch
+    );
   });
 
-});
+
+  /* Total jobs */
+
+  if ($("#total")) {
+    $("#total").textContent = filteredJobs.length;
+  }
+
+  if ($("#msg")) {
+    $("#msg").textContent =
+      `${filteredJobs.length} job${filteredJobs.length === 1 ? "" : "s"} found`;
+  }
 
 
-/* Job type filters */
+  /* Display jobs */
 
-document.querySelectorAll(".type").forEach(box => {
+  const jobsBox = $("#jobs");
 
-  box.addEventListener("change", load);
+  if (jobsBox) {
 
-});
+    if (filteredJobs.length === 0) {
 
+      jobsBox.innerHTML = `
+        <div class="empty">
+          <h3>🔎 No jobs found</h3>
+          <p>
+            Search another job, company, branch or location.
+          </p>
+        </div>
+      `;
 
-/* Search */
+    } else {
 
-const searchBtn = $("#search");
-
-if (searchBtn) {
-  searchBtn.addEventListener("click", load);
-}
-
-
-/* Enter key search */
-
-const searchBox = $("#q");
-
-if (searchBox) {
-
-  searchBox.addEventListener("keydown", e => {
-
-    if (e.key === "Enter") {
-      load();
+      jobsBox.innerHTML =
+        filteredJobs.map(createJobCard).join("");
     }
+  }
 
-  });
 
+  /* Hot jobs */
+
+  const hotBox = $("#hot");
+
+  if (hotBox) {
+
+    const hotJobs = allJobs.slice(0, 5);
+
+    hotBox.innerHTML =
+      hotJobs.length
+        ? hotJobs.map(createJobCard).join("")
+        : "<p>No jobs available.</p>";
+  }
 }
 
 
-/* Initial load */
+/* =========================
+   JOB CARD
+========================= */
 
-load();
+function createJobCard(job) {
+
+  const title =
+    escape
