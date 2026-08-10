@@ -1,21 +1,175 @@
-let branch="All";
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-async function load(){
- const params=new URLSearchParams(location.search);
- const type=params.get("type")||"";
- const selected=[...document.querySelectorAll(".type:checked")].map(x=>x.value);
- const p=new URLSearchParams({branch, q:$("#q").value.trim(), sort:$("#sort").value});
- if(type)p.set("type",type); else if(selected.length)p.set("types",selected.join(","));
- const r=await fetch("/api/jobs?"+p,{credentials:"same-origin"});
- const data=await r.json();
- $("#total").textContent=data.counts.total; $("#gov").textContent=data.counts.government; $("#psu").textContent=data.counts.psu; $("#priv").textContent=data.counts.private; $("#app").textContent=data.counts.apprenticeship;
- $("#msg").textContent=`${data.jobs.length} publisher-approved fresher listing(s)`;
- $("#jobs").innerHTML=data.jobs.length?data.jobs.map(card).join(""):"<div class='panel'>No matching fresher jobs found.</div>";
- $("#hot").innerHTML=data.hot.map((j,i)=>`<div class="hotitem"><b>${i+1}. ${esc(j.company)}</b><small>${esc(j.post)} • Last Date ${new Date(j.deadline).toLocaleDateString("en-IN")}</small></div>`).join("");
+let branch = "All";
+
+const $ = s => document.querySelector(s);
+
+async function load() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const type = params.get("type") || "";
+
+    const selected = [
+      ...document.querySelectorAll(".type:checked")
+    ].map(x => x.value);
+
+    const q = $("#q")?.value?.trim().toLowerCase() || "";
+
+    const r = await fetch("./jobs.json", {
+      cache: "no-store"
+    });
+
+    if (!r.ok) throw new Error("jobs.json not found");
+
+    const data = await r.json();
+
+    let jobs = Array.isArray(data.jobs) ? data.jobs : [];
+
+    if (branch !== "All") {
+      jobs = jobs.filter(j =>
+        Array.isArray(j.branches) &&
+        j.branches.some(b =>
+          String(b).toLowerCase() === branch.toLowerCase()
+        )
+      );
+    }
+
+    if (selected.length) {
+      jobs = jobs.filter(j =>
+        selected.includes(j.category)
+      );
+    }
+
+    if (type) {
+      jobs = jobs.filter(j =>
+        j.category === type
+      );
+    }
+
+    if (q) {
+      jobs = jobs.filter(j =>
+        Object.values(j).some(v =>
+          JSON.stringify(v).toLowerCase().includes(q)
+        )
+      );
+    }
+
+    $("#total").textContent = jobs.length;
+
+    if ($("#msg")) {
+      $("#msg").textContent =
+        jobs.length
+          ? `${jobs.length} opportunities found`
+          : "No matching jobs found";
+    }
+
+    $("#jobs").innerHTML =
+      jobs.map(card).join("");
+
+    if ($("#hot")) {
+      const hot = Array.isArray(data.hot)
+        ? data.hot
+        : jobs.slice(0, 5);
+
+      $("#hot").innerHTML =
+        hot.map(card).join("");
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    $("#jobs").innerHTML = `
+      <article class="job-card">
+        <h3>Jobs temporarily unavailable</h3>
+        <p>Please try again shortly.</p>
+      </article>
+    `;
+
+    if ($("#msg")) {
+      $("#msg").textContent =
+        "Job data loading error";
+    }
+  }
 }
-function card(j){return `<article class="job"><div><div class="company">${esc(j.company)}</div><small>${esc(j.source_name||"Official source")}</small><span class="tag">✓ Fresher / 0 Exp.</span></div><div><div class="branchtext">${esc(j.branch)}</div><small>${esc(j.type)}</small></div><div><b>${esc(j.post)}</b><small>📍 ${esc(j.location)}</small></div><div><div class="deadline">${new Date(j.deadline).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</div><small>${esc(j.salary||"See notification")}</small></div><div class="actions"><a class="apply" href="${esc(j.apply_url)}" target="_blank" rel="noopener noreferrer nofollow">Apply Now</a><a class="notify" href="${esc(j.notification_url)}" target="_blank" rel="noopener noreferrer nofollow">Notification</a></div></article>`}
-document.querySelectorAll(".branch").forEach(b=>b.addEventListener("click",()=>{branch=b.dataset.b;document.querySelectorAll(".branch").forEach(x=>x.classList.remove("active"));b.classList.add("active");load()}));
-document.querySelectorAll(".type").forEach(x=>x.addEventListener("change",load));
-$("#search").addEventListener("click",load); $("#q").addEventListener("keydown",e=>{if(e.key==="Enter")load()}); $("#sort").addEventListener("change",load);
+
+function card(j) {
+  const branches = Array.isArray(j.branches)
+    ? j.branches.join(", ")
+    : "";
+
+  const apply =
+    j.applyUrl ||
+    j.officialApply ||
+    j.url ||
+    "#";
+
+  return `
+    <article class="job-card">
+      <div class="job-top">
+        <span class="badge">${esc(j.category || "Job")}</span>
+        ${
+          j.fresherOnly
+            ? `<span class="badge">Fresher</span>`
+            : ""
+        }
+      </div>
+
+      <h3>${esc(j.title || "Job Opportunity")}</h3>
+
+      <p><b>Company:</b> ${esc(j.company || "-")}</p>
+      <p><b>Branch:</b> ${esc(branches || "-")}</p>
+      <p><b>Qualification:</b> ${esc(j.qualification || "-")}</p>
+      <p><b>Location:</b> ${esc(j.location || "-")}</p>
+
+      ${
+        j.lastDate
+          ? `<p><b>Last Date:</b> ${esc(j.lastDate)}</p>`
+          : ""
+      }
+
+      ${
+        j.salary
+          ? `<p><b>Salary/Stipend:</b> ${esc(j.salary)}</p>`
+          : ""
+      }
+
+      <a class="apply-btn"
+         href="${esc(apply)}"
+         target="_blank"
+         rel="noopener noreferrer">
+        Official Apply ↗
+      </a>
+    </article>
+  `;
+}
+
+function esc(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+document.querySelectorAll(".branch").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll(".branch")
+      .forEach(x => x.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    branch = btn.dataset.b || "All";
+
+    load();
+  });
+});
+
+document.querySelectorAll(".type").forEach(box => {
+  box.addEventListener("change", load);
+});
+
+$("#q")?.addEventListener("input", load);
+
+$("#search")?.addEventListener("click", load);
+
 load();
