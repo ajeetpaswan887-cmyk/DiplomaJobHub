@@ -1,0 +1,1 @@
+const bcrypt=require("bcryptjs");const readline=require("readline");const r=readline.createInterface({input:process.stdin,output:process.stdout});r.question("New admin password: ",p=>{if(!p||p.length<12){console.error("Use at least 12 characters.");process.exit(1)}console.log(bcrypt.hashSync(p,12));r.close()});
