@@ -1,1 +1,41 @@
-
+{
+  "jobs": [
+    {
+      "title": "Railway Junior Engineer",
+      "company": "Indian Railways / RRB",
+      "category": "Government",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Diploma in relevant Engineering",
+      "location": "India",
+      "salary": "As per official notification",
+      "source": "https://www.rrbcdg.gov.in/",
+      "applyUrl": "https://www.rrbcdg.gov.in/"
+    },
+    {
+      "title": "SSC Junior Engineer",
+      "company": "Staff Selection Commission",
+      "category": "Government",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Diploma/Degree as specified in official notification",
+      "location": "India",
+      "salary": "As per official notification",
+      "source": "https://ssc.gov.in/",
+      "applyUrl": "https://ssc.gov.in/"
+    },
+    {
+      "title": "PSU / Power Sector Opportunities",
+      "company": "Government & PSU",
+      "category": "PSU",
+      "branches": ["Electrical", "Mechanical", "Civil"],
+      "fresherOnly": true,
+      "qualification": "Diploma in relevant Engineering",
+      "location": "India",
+      "salary": "As per individual notification",
+      "source": "https://www.ncs.gov.in/",
+      "applyUrl": "https://www.ncs.gov.in/"
+    }
+  ],
+  "hot": []
+}
